@@ -5,13 +5,9 @@
     <div v-if="!gameStarted" @click="startGame" class="start-button">
       Start Game
     </div>
-    <div v-else class="canvas">
-      <canvas
-        ref="gameCanvas"
-        width="400"
-        height="400"
-        class="border-4 border-gray-800"
-      ></canvas>
+    <div v-else>
+      <div class="score-text">Current score: {{ score }}</div>
+      <canvas ref="gameCanvas" width="400" height="400" class="canvas"></canvas>
 
       <!-- 游戏胜利 Modal -->
       <Modal
@@ -102,9 +98,9 @@ let ctx: CanvasRenderingContext2D | null;
 let snake: { x: number; y: number }[];
 let food: { x: number; y: number };
 let direction: { x: number; y: number };
-let score: number;
 let gameInterval: number;
 const gameSpeed: number = 300; // 调整速度，数值越大速度越慢
+const score = ref<number>(0);
 
 // 蛇的颜色数组，循环使用
 const snakeColors = ["#F7CFD8", "#F4F8D3", "#A6F1E0", "#73C7C7"];
@@ -162,7 +158,7 @@ const initializeGame = (): void => {
   snake = [{ x: 10, y: 10 }];
   food = getRandomPosition();
   direction = { x: 1, y: 0 };
-  score = 0;
+  score.value = 0;
 
   document.addEventListener("keydown", changeDirection);
 
@@ -172,10 +168,24 @@ const initializeGame = (): void => {
 
 const getRandomPosition = (): { x: number; y: number } => {
   const gridSize = 20;
-  return {
-    x: Math.floor(Math.random() * (400 / gridSize)),
-    y: Math.floor(Math.random() * (400 / gridSize)),
-  };
+  let newPosition;
+
+  // 循环生成随机位置，直到不与蛇的身体重叠
+  do {
+    newPosition = {
+      x: Math.floor(Math.random() * (400 / gridSize)),
+      y: Math.floor(Math.random() * (400 / gridSize)),
+    };
+  } while (isOnSnake(newPosition));
+
+  return newPosition;
+};
+
+// 检查食物是否出现在蛇的身体上
+const isOnSnake = (position: { x: number; y: number }): boolean => {
+  return snake.some(
+    (segment) => segment.x === position.x && segment.y === position.y
+  );
 };
 
 const changeDirection = (e: KeyboardEvent): void => {
@@ -214,9 +224,9 @@ const updateGame = (): void => {
   snake.unshift(head);
 
   if (head.x === food.x && head.y === food.y) {
-    score++;
+    score.value++;
     food = getRandomPosition();
-    if (score === 25) {
+    if (score.value === 25) {
       clearInterval(gameInterval); // 暂停游戏
       showWinModal.value = true; // 显示胜利模态框
     }
@@ -316,6 +326,11 @@ body,
 .title {
   font-size: 30px;
   margin-bottom: 70px;
+}
+
+.score-text {
+  margin-bottom: 10px;
+  color: rgb(6, 84, 123);
 }
 
 .start-button {
