@@ -1,6 +1,6 @@
 <template>
   <div class="page flex flex-col items-center justify-center min-h-screen">
-    <audio ref="bgm" src="src/assets/bgm-music.mp3" loop></audio>
+    <audio ref="bgm" src="/balabala/src/assets/bgm-music.mp3" loop></audio>
     <div class="title">Look who found this game 👀? Go play it!</div>
     <div v-if="!gameStarted" @click="startGame" class="start-button">
       Start Game
